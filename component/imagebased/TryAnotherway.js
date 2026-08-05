@@ -13,7 +13,7 @@ export default function AnotherWay({ navigation }) {
 
   const fun1 = () => {
     axios
-      .get("http://localhost:3000/api/user/get/")
+      .get("http://localhost:3001/api/user/get/")
       .then((resp) => {
         setdata(resp.data);
         console.warn(resp.data);

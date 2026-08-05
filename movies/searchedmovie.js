@@ -73,7 +73,7 @@ export default function SearchMovie({ navigation }) {
   useEffect(() => {
     // axios.get("http://localhost:3000/api/movie/get",{headers:{Authorization:`${tokentext.Token}`}})
     axios
-      .get("http://localhost:3000/api/movie/get", { headers: headers })
+      .get("http://localhost:3001/api/movie/get", { headers: headers })
       .then((res) => {
         setmyData(res.data);
         // const token = response.data.token;
@@ -86,7 +86,7 @@ export default function SearchMovie({ navigation }) {
 
   const search = () => {
     axios
-      .get(`http://localhost:3000/api/movie/search/${input}`)
+      .get(`http://localhost:3001/api/movie/search/${input}`)
       .then((res) => {
         setmyData(res.data);
       })

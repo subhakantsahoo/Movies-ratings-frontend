@@ -1,0 +1,12 @@
+node_modules
+npm-debug.log*
+.expo
+.expo-shared
+.git
+.gitignore
+.vscode
+coverage
+Dockerfile
+.dockerignore
+README.md
+*.local

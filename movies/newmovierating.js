@@ -17,7 +17,7 @@ export default function Newmovieratings({ navigation, route }) {
   const fun2 = () => {
     try {
       const data = axios
-        .post(`http://localhost:3000/api/movie/create`, {
+        .post(`http://localhost:3001/api/movie/create`, {
           movie: movie,
           image: image,
         })

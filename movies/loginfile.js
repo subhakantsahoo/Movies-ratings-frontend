@@ -55,7 +55,7 @@ export default function Homescreen({ navigation }) {
       return;
     }
     axios
-      .post(`http://localhost:3000/api/auth/login`, {
+      .post(`http://localhost:3001/api/auth/login`, {
         user: user,
         password: password,
       })

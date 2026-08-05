@@ -43,7 +43,7 @@ export default function Moviesdetail({ route, navigation }) {
     if (route.params) {
       console.log(route.params.movie);
       axios
-        .get(`http://localhost:3000/api/rating/one/${route.params.movie}`)
+        .get(`http://localhost:3001/api/rating/one/${route.params.movie}`)
         .then((res) => {
           console.log(res);
           setuserdata(res.data);
@@ -77,7 +77,7 @@ export default function Moviesdetail({ route, navigation }) {
     if (route.params) {
       console.log(route.params.movie);
       axios
-        .get(`http://localhost:3000/api/movie/one/${route.params.movie}`)
+        .get(`http://localhost:3001/api/movie/one/${route.params.movie}`)
         .then((res) => {
           console.log(res);
           setmyData(res.data);

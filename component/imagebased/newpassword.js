@@ -21,7 +21,7 @@ export default function Newpassword({ navigation }) {
     }
 
     try {
-      await axios.patch(`http://localhost:3000/api/user/${userid}`, {
+      await axios.patch(`http://localhost:3001/api/user/${userid}`, {
         _id: userid,
         password: password,
       });

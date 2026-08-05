@@ -14,7 +14,7 @@ export default function Register({navigation}) {
 
     const formDatasave=async()=>{
       try{
-        const{data}=await axios.post(`http://localhost:3000/api/user/create`,{phno:phno,user:user,password:password})
+        const{data}=await axios.post(`http://localhost:3001/api/user/create`,{phno:phno,user:user,password:password})
         console.log(data);
         navigation.navigate('Homescreen')
       }catch(err){
