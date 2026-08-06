@@ -30,7 +30,8 @@
     "react-router-dom": "^6.8.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.9"
+    "@babel/core": "^7.12.9",
+    "cross-env": "^7.0.3"
   },
   "private": true
 }
