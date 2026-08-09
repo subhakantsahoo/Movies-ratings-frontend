@@ -1,189 +1,109 @@
 //import { useNavigation } from '@react-navigation/native';
 import React, { useState, useEffect, useContext } from "react";
-import { createContext } from "react";
-import { StyleSheet, Text, View, Button, TouchableOpacity } from "react-native";
+import { Animated, StyleSheet, Text, View, TouchableOpacity, Pressable } from "react-native";
 import { TextInput } from "react-native";
 import axios from "axios";
 import authContext from "./user-context";
-// import AuthContext from './token-context';
 import config from "../config";
+import { colors, theme } from "../component/ui/theme";
 export default function Homescreen({ navigation }) {
-  const [showEmoji, setShowEmoji] = useState(false);
-
-  // const history=useNavigation();
-  // const [user,setuser]=useState('');
   const [user, setuser] = useState("");
   const [password, setpassword] = useState("");
-  const [Error, setError] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [intro] = useState(new Animated.Value(0));
 
   const usercontext = useContext(authContext);
   // const tokencontext=useContext(AuthContext);
 
   useEffect(() => {
-    setuser(localStorage.getItem("User Name"));
-    // setuser(localStorage.setItem(""));
+    Animated.timing(intro, { toValue: 1, duration: 650, useNativeDriver: true }).start();
   }, []);
-
-  //  const handleLogin = () => {
-
-  //   if (user === '' && password === '') {
-  //       setError('');
-  //       navigation.navigate('movielist')
-  //   }
-  // //  else if (user === 'trex' && password === 'trex123') {
-  // //     setError('');
-  // //     navigation.navigate('Back')
-  // // }
-  //   else {
-  //     setError('Invalid username or password');
-  //   }
-  // };
-
-  //************************* */
-  const handleMouseEnter = () => {
-    setShowEmoji(true);
-  };
-
-  const handleMouseLeave = () => {
-    setShowEmoji(false);
-  };
-
   const userValidation = () => {
-    console.log("***********");
     if (user.trim() === "" || password.trim() === "") {
-      alert("Please enter both username and password");
+      setError("Enter both your username and password to continue.");
       return;
     }
+    setLoading(true);
+    setError("");
     axios
       .post(`${config.backend_url}/api/auth/login`, {
         user: user,
         password: password,
       })
       .then((response) => {
-        console.log("token is created", response.data);
         if (response.data) {
-          // const token = response.data.token;
-          const authToken = response.data.Token;
           const userId = response.data.userId;
-          console.log("Here is the authToken :: ", authToken);
-          console.log("Here is the userId which is get from Token :: ", userId);
-          console.log(
-            "Here is the response data(created Token) setItem in localStorage***:: ",
-            response.data
-          );
           localStorage.setItem("User Name", JSON.stringify(response.data));
           usercontext.setuser(user);
-          // tokencontext.setToken(token)
-          // axios.defaults.headers.common['Authorization*******'] = `${token}`;
           navigation.navigate("movielist", { userId: userId });
         } else {
-          alert(response.data);
+          setError("We could not verify those details.");
         }
       })
       .catch((error) => {
-        console.log(error.message);
-        console.log("Invalid UserName or Password");
+        setError(error.response?.data?.message || "Those details were not recognised. Try again.");
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
   return (
     <View style={styles.container}>
-      <View style={styles.inputbox}>
-        <TextInput
-          style={styles.user}
-          placeholder="Username"
-          onChangeText={(user) => {
-            setuser(user);
-          }}
-        ></TextInput>
-        <TextInput
-          style={styles.password}
-          placeholder="Password"
-          secureTextEntry={true}
-          onChangeText={(password) => setpassword(password)}
-        ></TextInput>
-      </View>
-      <View style={styles.forgetpassword}>
-        <TouchableOpacity
-          style={styles.passwordforget}
-          onPress={() => navigation.navigate("Home")}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
-          <Text>
-            Forget Password ?
-            {showEmoji && <Text style={styles.emoji}> 😖</Text>}
-          </Text>
-        </TouchableOpacity>
-
-        <View style={styles.Button}>
-          <Button
-            onPress={() => navigation.navigate("registrationfile")}
-            title="Register"
-            color={"#85929e"}
-          ></Button>
+      <View style={styles.brandPanel}>
+        <Text style={styles.brandMark}>FRAME / 01</Text>
+        <View>
+          <Text style={styles.brandTitle}>Stories worth{`\n`}remembering.</Text>
+          <Text style={styles.brandCopy}>A considered home for your watchlist, ratings, and the films that stay with you.</Text>
         </View>
-        <View style={styles.Button1}>
-          <Button
-            onPress={userValidation}
-            title="Login"
-            color={"#85929e"}
-          ></Button>
-        </View>
+        <Text style={styles.brandFooter}>CURATE YOUR CINEMA</Text>
       </View>
+      <Animated.View style={[styles.formPanel, { opacity: intro, transform: [{ translateY: intro.interpolate({ inputRange: [0, 1], outputRange: [18, 0] }) }] }]}>
+        <Text style={theme.eyebrow}>Welcome back</Text>
+        <Text style={styles.heading}>Your cinema, continued.</Text>
+        <Text style={[theme.body, styles.subheading]}>Sign in to pick up where you left off.</Text>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>USERNAME</Text>
+          <TextInput style={theme.input} placeholder="Enter your username" value={user} onChangeText={setuser} autoCapitalize="none" />
+          <Text style={styles.label}>PASSWORD</Text>
+          <TextInput style={theme.input} placeholder="Enter your password" value={password} secureTextEntry onChangeText={setpassword} />
+        </View>
+        {error !== "" && <Text style={styles.error}>{error}</Text>}
+        <Pressable style={({ pressed }) => [theme.primaryButton, pressed && styles.pressed, loading && styles.disabled]} onPress={userValidation} disabled={loading}>
+          <Text style={theme.primaryButtonText}>{loading ? "Signing in..." : "Enter the collection"}</Text>
+        </Pressable>
+        <View style={styles.actions}>
+          <TouchableOpacity onPress={() => navigation.navigate("Home")}><Text style={styles.link}>Forgot password?</Text></TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate("registrationfile")}><Text style={styles.link}>Create account</Text></TouchableOpacity>
+        </View>
+      </Animated.View>
     </View>
   );
 }
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#3498db",
-    alignContent: "center",
-    justifyContent: "center",
+    backgroundColor: colors.paper,
+    flexDirection: "row",
   },
-
-  user: {
-    backgroundColor: "#f0f3f4",
-    margin: 5,
-    width: 251,
-    borderRadius: 5,
-    height: 30,
-    borderColor: "#02436d",
-  },
-  password: {
-    backgroundColor: "#f0f3f4",
-    width: 250,
-    borderRadius: 5,
-    height: 30,
-    borderColor: "#02436d",
-    margin: 3,
-  },
-  passwordforget: {
-    margin: 10,
-    alignContent: "center",
-    alignSelf: "center",
-  },
-  inputbox: {
-    alignItems: "center",
-    justifyContent: "center",
-    alignSelf: "center",
-    margin: 20,
-  },
-  Buttonarea: {
-    justifyContent: "space-around",
-  },
-  Button: {
-    alignItems: "center",
-    margin: 1,
-  },
-  Button1: {
-    alignItems: "center",
-    margin: 10,
-  },
+  brandPanel: { backgroundColor: colors.midnight, flex: 1, justifyContent: "space-between", padding: 54 },
+  brandMark: { color: colors.gold, fontSize: 12, fontWeight: "800", letterSpacing: 3 },
+  brandTitle: { color: colors.white, fontSize: 48, fontWeight: "800", lineHeight: 54 },
+  brandCopy: { color: "#B6C0CB", fontSize: 16, lineHeight: 25, marginTop: 24, maxWidth: 360 },
+  brandFooter: { color: "#73808D", fontSize: 11, fontWeight: "800", letterSpacing: 2 },
+  formPanel: { alignSelf: "center", justifyContent: "center", maxWidth: 490, padding: 54, width: "52%" },
+  heading: { color: colors.ink, fontSize: 32, fontWeight: "800", marginTop: 12 },
+  subheading: { marginTop: 10 },
+  inputGroup: { gap: 9, marginTop: 34 },
+  label: { color: colors.muted, fontSize: 11, fontWeight: "800", letterSpacing: 1.5, marginTop: 10 },
   error: {
-    color: "red",
-    marginBottom: 20,
+    color: colors.accentDark,
+    fontSize: 13,
+    marginBottom: 15,
+    marginTop: 15,
   },
-  emoji: {
-    fontSize: 20,
-  },
+  actions: { flexDirection: "row", justifyContent: "space-between", marginTop: 24 },
+  link: { color: colors.accentDark, fontSize: 13, fontWeight: "700" },
+  pressed: { opacity: 0.8 },
+  disabled: { opacity: 0.55 },
 });

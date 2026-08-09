@@ -1,26 +1,32 @@
-import react, { useState } from "react";
+import React, { useState } from "react";
 import { Text, View, StyleSheet } from "react-native";
 import { Button } from "react-native-web";
 import axios from "axios";
 //import Test from './component/axiocomponet/testaxio';
 import { useEffect } from "react";
-import { Columns } from "react-native-feather";
 import config from "../../config";
+import LoadingState from "../ui/LoadingState";
 //import Test from '../axiocomponet/testaxio';
 export default function AnotherWay({ navigation }) {
   const [data, setdata] = useState([]);
   const [buttonClicked, setButtonClicked] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const fun1 = () => {
+    setLoading(true);
+    setError("");
     axios
-      .get("${config.backend_url}/api/user/get/")
+      .get(`${config.backend_url}/api/user/get/`)
       .then((resp) => {
-        setdata(resp.data);
-        console.warn(resp.data);
+        setdata(Array.isArray(resp.data) ? resp.data : []);
         setButtonClicked(true);
       })
-      .catch((err) => {
-        console.error("404");
+      .catch(() => {
+        setError("Recovery details are unavailable right now.");
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -39,10 +45,6 @@ export default function AnotherWay({ navigation }) {
                   <Text style={Styles.detail}>{item.user}</Text>
                 </View>
                 <View style={Styles.row}>
-                  <Text style={Styles.heading}>Password:</Text>
-                  <Text style={Styles.detail}>{item.password}</Text>
-                </View>
-                <View style={Styles.row}>
                   <Text style={Styles.heading}>Phno:</Text>
                   <Text style={Styles.detail}>{item.phno}</Text>
                 </View>
@@ -59,9 +61,8 @@ export default function AnotherWay({ navigation }) {
   return (
     <View style={Styles.container}>
       <View style={Styles.container1}>
-        <Text>
-          <h1>Hello world...!!</h1>
-        </Text>
+        <Text style={Styles.title}>Account recovery</Text>
+        <Text style={Styles.copy}>Verify your account details to continue.</Text>
         <Button
           style={{ margin: 10 }}
           title="click"
@@ -76,7 +77,9 @@ export default function AnotherWay({ navigation }) {
         />
       </View>
 
-      <View style={Styles.container2}>{fun2()}</View>
+      <View style={Styles.container2}>
+        {loading || error ? <LoadingState error={error} onRetry={fun1} label="Checking recovery options" /> : fun2()}
+      </View>
     </View>
   );
 }
@@ -92,6 +95,8 @@ const Styles = StyleSheet.create({
     justifyContent: "center",
     // padding: 10,
   },
+  title: { color: "white", fontSize: 28, fontWeight: "800", marginBottom: 12 },
+  copy: { color: "#E6EEF4", fontSize: 15, marginBottom: 18 },
   container2: {
     flex: 1,
     backgroundColor: "#5da",

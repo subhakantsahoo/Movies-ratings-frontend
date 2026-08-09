@@ -1,23 +1,21 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
-  Button,
   StyleSheet,
-  TextInput,
   Pressable,
 } from "react-native-web";
 
 import { Image } from "react-native-web";
-import { useState } from "react";
 import axios from "axios";
 import { AntDesign } from "@expo/vector-icons";
 import { Octicons } from "@expo/vector-icons";
-import { EvilIcons } from "@expo/vector-icons";
 import Logout from "./logout";
-import { Input, Space } from "antd";
+import { Input } from "antd";
 import config from "../config";
+import LoadingState from "../component/ui/LoadingState";
+import { colors, theme } from "../component/ui/theme";
 const { Search } = Input;
 
 export default function Movielist({ navigation }) {
@@ -42,7 +40,8 @@ export default function Movielist({ navigation }) {
   const logoutEmoji = isHovered ? "👋👋" : "👋";
   const [myData, setmyData] = useState([]);
   const [input, setinput] = useState("");
-  const [movie, setmovie] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const fun1 = (_id) => {
     try {
@@ -61,15 +60,25 @@ export default function Movielist({ navigation }) {
     console.log("Movie Id is :  ");
     navigation.navigate("moviesdetail", { movie: id });
   };
-  const token = JSON.parse(localStorage.getItem("User Name")).token;
+  const storedUser = localStorage.getItem("User Name");
+  const token = storedUser ? JSON.parse(storedUser)?.Token || JSON.parse(storedUser)?.token : "";
   const headers = {
     Authorization: `Bearer ${token}`,
   };
   useEffect(() => {
+    setLoading(true);
     axios
-      .get("${config.backend_url}/api/movie/get", { headers: headers })
+      .get(`${config.backend_url}/api/movie/get`, { headers: headers })
       .then((res) => {
-        setmyData(res.data);
+        setmyData(Array.isArray(res.data) ? res.data : []);
+        setError(Array.isArray(res.data) ? "" : "The collection response was not valid.");
+      })
+      .catch((error) => {
+        console.log(error);
+        setError("We could not load your collection.");
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }, []);
 
@@ -79,13 +88,17 @@ export default function Movielist({ navigation }) {
     axios
       .get(`${config.backend_url}/api/movie/search/${input}`)
       .then((res) => {
-        setmyData(res.data);
+        setmyData(Array.isArray(res.data) ? res.data : []);
+        setError(Array.isArray(res.data) ? "" : "No valid movie results were returned.");
       })
-      .catch((error) => console.log(error));
+      .catch((error) => {
+        console.log(error);
+        setError("Search is unavailable right now.");
+      });
   };
 
   const filteredData = myData.filter((item) => {
-    const moviex = item.movie.toLowerCase();
+    const moviex = typeof item.movie === "string" ? item.movie.toLowerCase() : "";
     const inputy = input.toLowerCase();
     return moviex.startsWith(inputy);
   });
@@ -93,7 +106,7 @@ export default function Movielist({ navigation }) {
   const handlePress = (value) => {
     setinput(value);
     const filteredDataWithSelectedMovie = myData.filter((item) => {
-      const moviex = item.movie.toLowerCase();
+      const moviex = typeof item.movie === "string" ? item.movie.toLowerCase() : "";
       const inputy = value.toLowerCase();
       return moviex.startsWith(inputy);
     });
@@ -108,7 +121,7 @@ export default function Movielist({ navigation }) {
     } else {
       setinput(text);
       const filteredDataWithSelectedMovie = myData.filter((item) => {
-        const moviex = item.movie.toLowerCase();
+        const moviex = typeof item.movie === "string" ? item.movie.toLowerCase() : "";
         const inputy = text.toLowerCase();
         return moviex.startsWith(inputy);
       });
@@ -119,13 +132,14 @@ export default function Movielist({ navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.text}>
-        <Text style={styles.List}>Movies List</Text>
+        <Text style={theme.eyebrow}>YOUR COLLECTION</Text>
+        <Text style={styles.List}>Films that made the cut.</Text>
+        <Text style={styles.subtitle}>Keep track of the stories you want to revisit.</Text>
       </View>
       <View style={styles.container2}>
-        <Button
-          title="AddNewMovie"
-          onPress={() => navigation.navigate("newmovieslist")}
-        ></Button>
+        <Pressable style={theme.primaryButton} onPress={() => navigation.navigate("newmovieslist")}>
+          <Text style={theme.primaryButtonText}>+ Add a film</Text>
+        </Pressable>
       </View>
       <View style={styles.Logout}>
         <Pressable
@@ -141,7 +155,7 @@ export default function Movielist({ navigation }) {
           ]}
         >
           <Logout />
-          <Text>Logout{logoutEmoji}</Text>
+            <Text style={styles.logoutText}>Logout</Text>
         </Pressable>
       </View>
       <View style={styles.searchitemcontainer}>
@@ -151,9 +165,7 @@ export default function Movielist({ navigation }) {
             onChange={handleInputChange}
             value={input}
             onSearch={search}
-            style={{
-              width: 200,
-            }}
+            style={styles.search}
             allowClear={true}
           />
           {/* <View style={styles.FontAwesome}>
@@ -168,7 +180,7 @@ export default function Movielist({ navigation }) {
             const { _id, movie, image } = post;
             if (input !== "") {
               return (
-                <View style={{ marginVertical: 10 }}>
+                <View key={_id} style={{ marginVertical: 10 }}>
                   <Text
                     style={{
                       fontSize: 14,
@@ -177,7 +189,6 @@ export default function Movielist({ navigation }) {
                     }}
                   >
                     <TouchableOpacity
-                      key={_id}
                       onPress={() => handlePress(movie)}
                     >
                       <Text>{movie}</Text>
@@ -197,18 +208,18 @@ export default function Movielist({ navigation }) {
           })}
         </View>
       </View>
-      {myData.map((data) => {
+      {loading || error ? <LoadingState error={error} onRetry={() => navigation.replace("movielist")} /> : <View style={styles.movieGrid}>{myData.map((data) => {
         const { _id, movie, image } = data;
         return (
           <View style={styles.container1} key={_id}>
             <Text style={styles.moviename}> {movie}</Text>
-            <Image source={{ uri: image }} style={styles.image}></Image>
+            <Image source={{ uri: image }} style={styles.image} />
             <View style={styles.icons}>
               <View style={styles.containerx}>
                 <Octicons
                   name="star-fill"
                   size={20}
-                  color="black"
+                  color={colors.gold}
                   onPress={() => fun2(_id)}
                 />
               </View>
@@ -216,129 +227,92 @@ export default function Movielist({ navigation }) {
                 <AntDesign
                   name="delete"
                   size={20}
-                  color="black"
+                  color={colors.accent}
                   onPress={() => fun1(_id)}
                 />
               </View>
             </View>
           </View>
         );
-      })}
+      })}</View>}
     </View>
   );
 }
 const styles = StyleSheet.create({
   container: {
-    textAlign: "center",
-    alignContent: "center",
-    alignItems: "center",
+    backgroundColor: colors.paper,
+    flex: 1,
+    paddingHorizontal: 32,
+    paddingVertical: 30,
   },
   text: {
-    alignContent: "center",
-    textAlign: "center",
-    margin: 10,
+    marginBottom: 22,
   },
+  subtitle: { color: colors.muted, fontSize: 15, marginTop: 8 },
   searchitemcontainer: {
-    alignContent: "center",
-    justifyContent: "center",
+    marginBottom: 22,
   },
   searchabar: {
-    marginRight: 300,
-    margin: 10,
+    maxWidth: 520,
   },
-  searchbox: {
-    padding: 10,
-    flexDirection: "row",
-    width: "95%",
-    backgroundColor: "#d9dbda",
-    borderRadius: 10,
-    alignContent: "center",
-    fontSize: 15,
-  },
-  FontAwesome: {
-    marginLeft: 130,
-    margin: -30,
-  },
-
-  searchButton: {
-    alignItems: "flex-start",
-
-    marginLeft: 230,
-
-    margin: -10,
-  },
+  search: { borderColor: colors.line, borderRadius: 8, borderWidth: 1, height: 48, width: "100%" },
   searchmoviename: {
-    marginRight: 310,
-    margin: 20,
+    maxWidth: 520,
   },
-
   container2: {
-    justifyContent: "center",
-    marginLeft: 290,
-    margin: -20,
+    alignSelf: "flex-start",
+    marginBottom: 18,
   },
   container1: {
-    textAlign: "center",
-    marginRight: 400,
-    alignContent: "space-between",
-    margin: 70,
-  },
-  container3: {
-    justifyContent: "center",
-    marginLeft: 400,
-    marginTop: -58,
-  },
-  icons: {
-    justifyContent: "center",
-    width: 100,
-    marginLeft: 400,
-    margin: -60,
-  },
-
-  containerx: {
-    alignItems: "center",
-    margin: -18,
-    marginRight: 50,
-  },
-  containery: {
-    alignItems: "center",
-    margin: -6,
-    marginLeft: 50,
-  },
-  image: {
-    flexDirection: "row",
+    backgroundColor: colors.white,
+    borderColor: colors.line,
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: "green",
-    marginTop: 0,
-    width: 140,
-    height: 180,
-    marginLeft: 155,
+    marginBottom: 22,
+    marginRight: 18,
+    padding: 14,
+    width: 210,
+  },
+  movieGrid: { flexDirection: "row", flexWrap: "wrap", maxWidth: 1120 },
+  icons: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 14,
+  },
+  containerx: { padding: 5 },
+  containery: { padding: 5 },
+  image: {
+    backgroundColor: colors.line,
+    borderRadius: 6,
+    height: 260,
+    width: "100%",
   },
   moviename: {
-    fontSize: 20,
-    color: "black",
-    textAlign: "center",
-    fontWeight: "bold",
-    fontStyle: "bold",
+    color: colors.ink,
+    fontSize: 17,
+    fontWeight: "800",
+    marginBottom: 12,
   },
   List: {
-    fontSize: 20,
-    color: "black",
-    textAlign: "center",
+    color: colors.ink,
+    fontSize: 34,
+    fontWeight: "800",
+    marginTop: 7,
   },
   Logout: {
-    justifyContent: "center",
-    marginLeft: 950,
-    margin: -15,
+    position: "absolute",
+    right: 32,
+    top: 28,
   },
-
   logoutButton: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 10,
+    borderColor: colors.line,
+    borderRadius: 7,
     borderWidth: 1,
-    borderColor: "gray",
-    borderRadius: 5,
-    marginBottom: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
   },
+  logoutText: { color: colors.muted, fontSize: 13, fontWeight: "700", marginLeft: 5 },
 });

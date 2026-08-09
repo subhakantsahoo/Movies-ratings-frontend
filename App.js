@@ -38,7 +38,7 @@ export default function App() {
     // <Homescreen></Homescreen>
 
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Homescreen">
+      <Stack.Navigator initialRouteName="Homescreen" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Homescreen" component={Homescreen}></Stack.Screen>
         {/* <Stack.Screen name='Back' component={Welcome}></Stack.Screen> */}
         <Stack.Screen name="Home" component={Password}></Stack.Screen>

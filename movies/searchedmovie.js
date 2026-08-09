@@ -63,7 +63,8 @@ export default function SearchMovie({ navigation }) {
   // const tokentext=localStorage.getItem('User Name') ;
   // const token={Authorization:`**** ${JSON.parse(tokentext).token}`}
 
-  const token = JSON.parse(localStorage.getItem("User Name")).token;
+  const storedUser = localStorage.getItem("User Name");
+  const token = storedUser ? JSON.parse(storedUser)?.Token || JSON.parse(storedUser)?.token : "";
   const headers = {
     Authorization: `Bearer ${token}`,
   };
@@ -73,9 +74,9 @@ export default function SearchMovie({ navigation }) {
   useEffect(() => {
     // axios.get("http://localhost:3000/api/movie/get",{headers:{Authorization:`${tokentext.Token}`}})
     axios
-      .get("${config.backend_url}/api/movie/get", { headers: headers })
+      .get(`${config.backend_url}/api/movie/get`, { headers: headers })
       .then((res) => {
-        setmyData(res.data);
+        setmyData(Array.isArray(res.data) ? res.data : []);
         // const token = response.data.token;
 
         // tokentext.setToken(user)
@@ -88,14 +89,14 @@ export default function SearchMovie({ navigation }) {
     axios
       .get(`${config.backend_url}/api/movie/search/${input}`)
       .then((res) => {
-        setmyData(res.data);
+        setmyData(Array.isArray(res.data) ? res.data : []);
       })
       .catch((error) => console.log(error));
   };
 
 
   const filteredData = myData.filter(item => {
-    const moviex = item.movie.toLowerCase();
+    const moviex = typeof item.movie === "string" ? item.movie.toLowerCase() : "";
     const  inputy= input.toLowerCase(); 
     // console.log(inputy);
     return moviex.startsWith(inputy);
@@ -150,7 +151,7 @@ export default function SearchMovie({ navigation }) {
          if(input!==""){
         return (
           
-          <View style={{marginVertical:10}}>
+          <View key={_id} style={{marginVertical:10}}>
             <Text style={{fontSize:14,fontWeight:"bold",alignSelf:'flex-start'}}><TouchableOpacity onPress={search} ><Text>{movie}</Text></TouchableOpacity></Text>
             <Text style={{borderColor:"gray",borderWidth:1,height:1,marginTop:5}}></Text>
             </View>

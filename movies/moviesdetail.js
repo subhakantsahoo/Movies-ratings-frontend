@@ -12,11 +12,14 @@ import axios from "axios";
 import { AirbnbRating, Rating } from "react-native-ratings";
 import Logout from "./logout";
 import config from "../config";
+import LoadingState from "../component/ui/LoadingState";
+import { colors } from "../component/ui/theme";
 export default function Moviesdetail({ route, navigation }) {
-  const [myData, setmyData] = useState([]);
-  const [movie, setmovie] = useState("");
+  const [myData, setmyData] = useState({});
   const [userdata, setuserdata] = useState([]);
   const [isHovered, setIsHovered] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const handlePressIn = () => {
     setIsHovered(true);
@@ -41,53 +44,26 @@ export default function Moviesdetail({ route, navigation }) {
   };
 
   useEffect(() => {
-    if (route.params) {
-      console.log(route.params.movie);
-      axios
-        .get(`${config.backend_url}/api/rating/one/${route.params.movie}`)
-        .then((res) => {
-          console.log(res);
-          setuserdata(res.data);
-        });
+    const movieId = route?.params?.movie;
+    if (!movieId) {
+      setError("This movie could not be found.");
+      setLoading(false);
+      return;
     }
-  }, [route?.params]);
+    Promise.all([
+      axios.get(`${config.backend_url}/api/rating/one/${movieId}`),
+      axios.get(`${config.backend_url}/api/movie/one/${movieId}`),
+    ])
+      .then(([ratingsResponse, movieResponse]) => {
+        setuserdata(Array.isArray(ratingsResponse.data) ? ratingsResponse.data : []);
+        setmyData(movieResponse.data && typeof movieResponse.data === "object" ? movieResponse.data : {});
+      })
+      .catch(() => setError("We could not load this film right now."))
+      .finally(() => setLoading(false));
+  }, [route?.params?.movie]);
 
-  //  console.log(route?.params);
-
-  // useEffect(() => {
-  //   // if(req.params.id ===route.params.rating)
-  //   axios
-  //     .get(`http://localhost:3000/api/rating/get` /*${route.params.movie}*/)
-
-  //     .then((res) => setuserdata(res.data));
-  // }, []);
-
-  //   useEffect(() => {
-  //     if (route.params) {
-  //       console.log(route.params.movie);
-  //       axios
-  //         .get(`http://localhost:3000/api/movie/one/${route.params.movie}`)
-  //         .then((res) => {
-  //           console.log(res);
-  //           setmyData(res.data);
-  //         });
-  //     }
-  //   }, [route]);
-
-  useEffect(() => {
-    if (route.params) {
-      console.log(route.params.movie);
-      axios
-        .get(`${config.backend_url}/api/movie/one/${route.params.movie}`)
-        .then((res) => {
-          console.log(res);
-          setmyData(res.data);
-        });
-    }
-  }, [route]);
-
-  const sum = userdata.reduce((acc, curr) => acc + curr.rating, 0);
-  const avgRating = (sum / userdata.length).toFixed(1);
+  const sum = userdata.reduce((acc, curr) => acc + (Number(curr.rating) || 0), 0);
+  const avgRating = userdata.length ? (sum / userdata.length).toFixed(1) : "0.0";
 
   // const fun2 = () => {
   //     //const {_id,movie,rating}=myData;
@@ -128,6 +104,8 @@ export default function Moviesdetail({ route, navigation }) {
 
   return (
     <View style={styles.container}>
+      {loading || error ? <LoadingState error={error} onRetry={() => navigation.replace("moviesdetail", route.params)} /> : null}
+      {!loading && !error && <>
       <View style={styles.Logout}>
         <Pressable
           onPress={handlePressog}
@@ -180,6 +158,7 @@ export default function Moviesdetail({ route, navigation }) {
       </View>
 
       <View style={styles.containerx}></View>
+      </>}
       {/* <View style={styles.list}>
             <TouchableOpacity onPress={()=>navigation.navigate("movielist",avgRating)}>List</TouchableOpacity>
             
