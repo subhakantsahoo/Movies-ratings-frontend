@@ -5,7 +5,7 @@ import axios from "axios";
 //import Test from './component/axiocomponet/testaxio';
 import { useEffect } from "react";
 import { Columns } from "react-native-feather";
-import config from "./config";
+import config from "../config";
 //import Test from '../axiocomponet/testaxio';
 export default function AnotherWay({ navigation }) {
   const [data, setdata] = useState([]);

@@ -4,7 +4,7 @@ import { Text, View, StyleSheet, Button } from "react-native";
 import { TextInput } from "react-native-web";
 import axios from "axios";
 import { useState } from "react";
-import config from "./config";
+import config from "../config";
 export default function Newpassword({ navigation }) {
   const [password, setpassword] = useState("");
   const [confirm, setconfirm] = useState("");

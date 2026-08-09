@@ -3,7 +3,7 @@ import react, { useState } from "react";
 import { Button } from "react-native";
 import { Text, View, StyleSheet } from "react-native";
 import { TextInput, TouchableOpacity } from "react-native-web";
-import config from "./config";
+import config from "../config";
 
 export default function Password({ navigation }) {
   const [phNo, setphNo] = useState("");

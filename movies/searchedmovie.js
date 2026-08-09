@@ -14,7 +14,7 @@ import { AntDesign } from "@expo/vector-icons";
 import { Octicons } from "@expo/vector-icons";
 // import { FontAwesome } from "@expo/vector-icons";
 import { EvilIcons } from '@expo/vector-icons'; 
-import config from "./config";
+import config from "../config";
 import AuthContext from "./token-context";
 import { useContext } from "react";
 import { json } from "react-router-dom";

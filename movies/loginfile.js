@@ -6,7 +6,7 @@ import { TextInput } from "react-native";
 import axios from "axios";
 import authContext from "./user-context";
 // import AuthContext from './token-context';
-import config from "./config";
+import config from "../config";
 export default function Homescreen({ navigation }) {
   const [showEmoji, setShowEmoji] = useState(false);
 

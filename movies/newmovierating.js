@@ -7,7 +7,7 @@ import { Rating } from "react-native-ratings";
 import { Button, TextInput, TouchableOpacity } from "react-native-web";
 import { useState } from "react";
 import axios from "axios";
-import config from "./config";
+import config from "../config";
 export default function Newmovieratings({ navigation, route }) {
   const [rating, setrating] = useState("");
   const [movie, setmovie] = useState("");

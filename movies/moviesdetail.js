@@ -11,7 +11,7 @@ import {
 import axios from "axios";
 import { AirbnbRating, Rating } from "react-native-ratings";
 import Logout from "./logout";
-import config from "./config";
+import config from "../config";
 export default function Moviesdetail({ route, navigation }) {
   const [myData, setmyData] = useState([]);
   const [movie, setmovie] = useState("");

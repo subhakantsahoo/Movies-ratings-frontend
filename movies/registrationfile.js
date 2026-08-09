@@ -4,7 +4,7 @@ import { Button } from 'react-native';
 import { Text, View ,StyleSheet} from 'react-native';
 import { TextInput, TouchableOpacity } from 'react-native-web';
 import { useNavigate,Link } from 'react-router-dom';
-import config from "./config";
+import config from "../config";
 export default function Register({navigation}) {
     const [user,setuser]=useState('');
     const [password,setpassword]=useState('');

@@ -17,7 +17,7 @@ import { Octicons } from "@expo/vector-icons";
 import { EvilIcons } from "@expo/vector-icons";
 import Logout from "./logout";
 import { Input, Space } from "antd";
-import config from "./config";
+import config from "../config";
 const { Search } = Input;
 
 export default function Movielist({ navigation }) {
