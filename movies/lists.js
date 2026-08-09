@@ -17,6 +17,7 @@ import { Octicons } from "@expo/vector-icons";
 import { EvilIcons } from "@expo/vector-icons";
 import Logout from "./logout";
 import { Input, Space } from "antd";
+import config from "./config";
 const { Search } = Input;
 
 export default function Movielist({ navigation }) {
@@ -46,7 +47,7 @@ export default function Movielist({ navigation }) {
   const fun1 = (_id) => {
     try {
       const { data } = axios
-        .delete(`http://localhost:3001/api/movie/${_id}`)
+        .delete(`${config.backend_url}/api/movie/${_id}`)
         .then((response) => {
           console.log(`Rating with ID ${_id} deleted successfully`);
           setmyData((prevData) => prevData.filter((data) => data._id !== _id));
@@ -66,7 +67,7 @@ export default function Movielist({ navigation }) {
   };
   useEffect(() => {
     axios
-      .get("http://localhost:3001/api/movie/get", { headers: headers })
+      .get("${config.backend_url}/api/movie/get", { headers: headers })
       .then((res) => {
         setmyData(res.data);
       });
@@ -76,7 +77,7 @@ export default function Movielist({ navigation }) {
 
   const search = () => {
     axios
-      .get(`http://localhost:3001/api/movie/search/${input}`)
+      .get(`${config.backend_url}/api/movie/search/${input}`)
       .then((res) => {
         setmyData(res.data);
       })

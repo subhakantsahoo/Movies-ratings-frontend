@@ -6,7 +6,7 @@ import { TextInput } from "react-native";
 import axios from "axios";
 import authContext from "./user-context";
 // import AuthContext from './token-context';
-
+import config from "./config";
 export default function Homescreen({ navigation }) {
   const [showEmoji, setShowEmoji] = useState(false);
 
@@ -55,7 +55,7 @@ export default function Homescreen({ navigation }) {
       return;
     }
     axios
-      .post(`http://localhost:3001/api/auth/login`, {
+      .post(`${config.backend_url}/api/auth/login`, {
         user: user,
         password: password,
       })

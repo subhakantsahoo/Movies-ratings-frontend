@@ -14,7 +14,7 @@ import { AntDesign } from "@expo/vector-icons";
 import { Octicons } from "@expo/vector-icons";
 // import { FontAwesome } from "@expo/vector-icons";
 import { EvilIcons } from '@expo/vector-icons'; 
-
+import config from "./config";
 import AuthContext from "./token-context";
 import { useContext } from "react";
 import { json } from "react-router-dom";
@@ -73,7 +73,7 @@ export default function SearchMovie({ navigation }) {
   useEffect(() => {
     // axios.get("http://localhost:3000/api/movie/get",{headers:{Authorization:`${tokentext.Token}`}})
     axios
-      .get("http://localhost:3001/api/movie/get", { headers: headers })
+      .get("${config.backend_url}/api/movie/get", { headers: headers })
       .then((res) => {
         setmyData(res.data);
         // const token = response.data.token;
@@ -86,7 +86,7 @@ export default function SearchMovie({ navigation }) {
 
   const search = () => {
     axios
-      .get(`http://localhost:3001/api/movie/search/${input}`)
+      .get(`${config.backend_url}/api/movie/search/${input}`)
       .then((res) => {
         setmyData(res.data);
       })

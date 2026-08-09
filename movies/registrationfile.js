@@ -4,7 +4,7 @@ import { Button } from 'react-native';
 import { Text, View ,StyleSheet} from 'react-native';
 import { TextInput, TouchableOpacity } from 'react-native-web';
 import { useNavigate,Link } from 'react-router-dom';
-
+import config from "./config";
 export default function Register({navigation}) {
     const [user,setuser]=useState('');
     const [password,setpassword]=useState('');
@@ -14,7 +14,7 @@ export default function Register({navigation}) {
 
     const formDatasave=async()=>{
       try{
-        const{data}=await axios.post(`http://localhost:3001/api/user/create`,{phno:phno,user:user,password:password})
+        const{data}=await axios.post(`${config.backend_url}/api/user/create`,{phno:phno,user:user,password:password})
         console.log(data);
         navigation.navigate('Homescreen')
       }catch(err){

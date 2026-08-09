@@ -7,6 +7,7 @@ import { Rating } from "react-native-ratings";
 import { Button, TextInput, TouchableOpacity } from "react-native-web";
 import { useState } from "react";
 import axios from "axios";
+import config from "./config";
 export default function Newmovieratings({ navigation, route }) {
   const [rating, setrating] = useState("");
   const [movie, setmovie] = useState("");
@@ -17,7 +18,7 @@ export default function Newmovieratings({ navigation, route }) {
   const fun2 = () => {
     try {
       const data = axios
-        .post(`http://localhost:3001/api/movie/create`, {
+        .post(`${config.backend_url}/api/movie/create`, {
           movie: movie,
           image: image,
         })

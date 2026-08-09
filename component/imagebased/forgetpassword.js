@@ -3,6 +3,7 @@ import react, { useState } from "react";
 import { Button } from "react-native";
 import { Text, View, StyleSheet } from "react-native";
 import { TextInput, TouchableOpacity } from "react-native-web";
+import config from "./config";
 
 export default function Password({ navigation }) {
   const [phNo, setphNo] = useState("");
@@ -16,7 +17,7 @@ export default function Password({ navigation }) {
       setError("Please enter your Phno.");
       return;
     }
-    axios.get(`http://localhost:3001/api/user/one/${userid}`).then((res) => {
+    axios.get(`${config.backend_url}/api/user/one/${userid}`).then((res) => {
       const fetchedPhNo = res.data.phno;
 
       if (phNo === fetchedPhNo.toString()) {

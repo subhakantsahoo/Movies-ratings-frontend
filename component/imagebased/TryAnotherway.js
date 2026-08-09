@@ -5,7 +5,7 @@ import axios from "axios";
 //import Test from './component/axiocomponet/testaxio';
 import { useEffect } from "react";
 import { Columns } from "react-native-feather";
-
+import config from "./config";
 //import Test from '../axiocomponet/testaxio';
 export default function AnotherWay({ navigation }) {
   const [data, setdata] = useState([]);
@@ -13,7 +13,7 @@ export default function AnotherWay({ navigation }) {
 
   const fun1 = () => {
     axios
-      .get("http://localhost:3001/api/user/get/")
+      .get("${config.backend_url}/api/user/get/")
       .then((resp) => {
         setdata(resp.data);
         console.warn(resp.data);
