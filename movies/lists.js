@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import { AntDesign } from "@expo/vector-icons";
 import { Octicons } from "@expo/vector-icons";
 import Logout from "./logout";
 import { Input } from "antd";
+import { useFocusEffect } from "@react-navigation/native";
 import config from "../config";
 import LoadingState from "../component/ui/LoadingState";
 import { colors, theme } from "../component/ui/theme";
@@ -39,21 +40,35 @@ export default function Movielist({ navigation }) {
 
   const logoutEmoji = isHovered ? "👋👋" : "👋";
   const [myData, setmyData] = useState([]);
+  const [allData, setAllData] = useState([]);
   const [input, setinput] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const fun1 = (_id) => {
+  const fetchMovies = useCallback(async () => {
+    setLoading(true);
+    setError("");
     try {
-      const { data } = axios
-        .delete(`${config.backend_url}/api/movie/${_id}`)
-        .then((response) => {
-          console.log(`Rating with ID ${_id} deleted successfully`);
-          setmyData((prevData) => prevData.filter((data) => data._id !== _id));
-        })
-        .catch((error) => console.log(error));
-    } catch (err) {
-      console.log(err);
+      const res = await axios.get(`${config.backend_url}/api/movie/get`, { headers });
+      const movies = Array.isArray(res.data) ? res.data : [];
+      setAllData(movies);
+      setmyData(movies);
+      if (!Array.isArray(res.data)) setError("The collection response was not valid.");
+    } catch (requestError) {
+      console.log(requestError);
+      setError("We could not load your collection.");
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
+
+  const fun1 = async (_id) => {
+    try {
+      await axios.delete(`${config.backend_url}/api/movie/${_id}`);
+      setAllData((prevData) => prevData.filter((data) => data._id !== _id));
+      setmyData((prevData) => prevData.filter((data) => data._id !== _id));
+    } catch (requestError) {
+      setError("This film could not be removed.");
     }
   };
   const fun2 = (id) => {
@@ -61,26 +76,19 @@ export default function Movielist({ navigation }) {
     navigation.navigate("moviesdetail", { movie: id });
   };
   const storedUser = localStorage.getItem("User Name");
-  const token = storedUser ? JSON.parse(storedUser)?.Token || JSON.parse(storedUser)?.token : "";
+  let token = "";
+  try {
+    const parsedUser = storedUser ? JSON.parse(storedUser) : {};
+    token = parsedUser?.Token || parsedUser?.token || "";
+  } catch (parseError) {
+    console.log(parseError);
+  }
   const headers = {
     Authorization: `Bearer ${token}`,
   };
-  useEffect(() => {
-    setLoading(true);
-    axios
-      .get(`${config.backend_url}/api/movie/get`, { headers: headers })
-      .then((res) => {
-        setmyData(Array.isArray(res.data) ? res.data : []);
-        setError(Array.isArray(res.data) ? "" : "The collection response was not valid.");
-      })
-      .catch((error) => {
-        console.log(error);
-        setError("We could not load your collection.");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, []);
+  useFocusEffect(useCallback(() => {
+    fetchMovies();
+  }, [fetchMovies]));
 
   //Search Bar****
 
@@ -88,7 +96,9 @@ export default function Movielist({ navigation }) {
     axios
       .get(`${config.backend_url}/api/movie/search/${input}`)
       .then((res) => {
-        setmyData(Array.isArray(res.data) ? res.data : []);
+        const movies = Array.isArray(res.data) ? res.data : [];
+        setAllData(movies);
+        setmyData(movies);
         setError(Array.isArray(res.data) ? "" : "No valid movie results were returned.");
       })
       .catch((error) => {
@@ -105,7 +115,7 @@ export default function Movielist({ navigation }) {
 
   const handlePress = (value) => {
     setinput(value);
-    const filteredDataWithSelectedMovie = myData.filter((item) => {
+    const filteredDataWithSelectedMovie = allData.filter((item) => {
       const moviex = typeof item.movie === "string" ? item.movie.toLowerCase() : "";
       const inputy = value.toLowerCase();
       return moviex.startsWith(inputy);
@@ -117,10 +127,10 @@ export default function Movielist({ navigation }) {
 
     if (text === "") {
       setinput(text);
-      setmyData(myData);
+      setmyData(allData);
     } else {
       setinput(text);
-      const filteredDataWithSelectedMovie = myData.filter((item) => {
+      const filteredDataWithSelectedMovie = allData.filter((item) => {
         const moviex = typeof item.movie === "string" ? item.movie.toLowerCase() : "";
         const inputy = text.toLowerCase();
         return moviex.startsWith(inputy);

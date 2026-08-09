@@ -13,7 +13,7 @@ import { AirbnbRating, Rating } from "react-native-ratings";
 import Logout from "./logout";
 import config from "../config";
 import LoadingState from "../component/ui/LoadingState";
-import { colors } from "../component/ui/theme";
+import { colors, theme } from "../component/ui/theme";
 export default function Moviesdetail({ route, navigation }) {
   const [myData, setmyData] = useState({});
   const [userdata, setuserdata] = useState([]);
@@ -106,7 +106,8 @@ export default function Moviesdetail({ route, navigation }) {
     <View style={styles.container}>
       {loading || error ? <LoadingState error={error} onRetry={() => navigation.replace("moviesdetail", route.params)} /> : null}
       {!loading && !error && <>
-      <View style={styles.Logout}>
+      <View style={styles.topbar}>
+        <Pressable onPress={() => navigation.goBack()}><Text style={styles.back}>Back to collection</Text></Pressable>
         <Pressable
           onPress={handlePressog}
           onPressIn={handlePressIn}
@@ -120,39 +121,30 @@ export default function Moviesdetail({ route, navigation }) {
           ]}
         >
           <Logout />
-          <Text>Logout{logoutEmoji}</Text>
+          <Text style={styles.logoutText}>Logout</Text>
         </Pressable>
       </View>
-      <View style={styles.container4}>
-        <Text style={styles.moviedata}>{myData.movie}</Text>
+      <View style={styles.hero}>
+        <View style={styles.posterFrame}>
         <Image source={{ uri: myData.image }} style={styles.image}></Image>
-      </View>
-
-      <View style={styles.avg}>
-        <Text>
-          <View>
-            <Rating
-              type="star"
-              ratingCount={5}
-              imageSize={30}
-              // showRating={true}
-              //    ratingTextColor="red"
-              readonly={true}
-              fractions={1}
-              //jumpValue={0.1}
-              ratingBackgroundColor="#aed6f1"
-              startingValue={avgRating}
-            />
+        </View>
+        <View style={styles.info}>
+          <Text style={theme.eyebrow}>Film detail</Text>
+          <Text style={styles.moviedata}>{myData.movie}</Text>
+          <Text style={styles.description}>A film in your personal archive, ready for another viewing.</Text>
+          <View style={styles.ratingPanel}>
+            <Text style={styles.ratingLabel}>COMMUNITY RATING</Text>
+            <View style={styles.ratingRow}>
+              <Rating type="star" ratingCount={5} imageSize={25} readonly fractions={1} startingValue={avgRating} />
+              <Text style={styles.ratingValue}>{avgRating}</Text>
+            </View>
           </View>
-          {avgRating}
-        </Text>
-      </View>
-      <View style={styles.Add}>
-        <Button title="Add" onPress={() => fun1(route.params.rating)} />
+          <Pressable style={theme.primaryButton} onPress={fun1}><Text style={theme.primaryButtonText}>Add your rating</Text></Pressable>
+        </View>
       </View>
 
       <View style={styles.userRatingList}>
-        <Text style={styles.RatingText}>Ratings</Text>
+        <Text style={styles.RatingText}>Recent ratings</Text>
 
         <Text style={styles.username}> {userRatingList()}</Text>
       </View>
@@ -169,12 +161,10 @@ export default function Moviesdetail({ route, navigation }) {
 
 const styles = StyleSheet.create({
   container: {
-    textAlign: "center",
-    alignContent: "center",
-    // justifyContent:'center',
-    alignItems: "center",
-    //  margin:-100,
-    backgroundColor: "white",
+    backgroundColor: colors.paper,
+    flex: 1,
+    paddingHorizontal: 42,
+    paddingVertical: 28,
   },
   text: {
     alignContent: "center",
@@ -187,11 +177,17 @@ const styles = StyleSheet.create({
     margin: 10,
     justifyContent: "center",
   },
-  Add: {
-    justifyContent: "center",
-    marginLeft: 450,
-    margin: 190,
-  },
+  topbar: { alignItems: "center", flexDirection: "row", justifyContent: "space-between", marginBottom: 34 },
+  back: { color: colors.muted, fontSize: 13, fontWeight: "700" },
+  logoutText: { color: colors.muted, fontSize: 13, fontWeight: "700", marginLeft: 5 },
+  hero: { alignItems: "center", flexDirection: "row", gap: 56, justifyContent: "center", maxWidth: 980, width: "100%" },
+  posterFrame: { backgroundColor: colors.midnight, borderRadius: 10, padding: 8 },
+  info: { maxWidth: 480, width: "45%" },
+  description: { color: colors.muted, fontSize: 15, lineHeight: 23, marginBottom: 28, marginTop: 14 },
+  ratingPanel: { borderColor: colors.line, borderRadius: 8, borderWidth: 1, marginBottom: 24, padding: 18 },
+  ratingLabel: { color: colors.muted, fontSize: 11, fontWeight: "800", letterSpacing: 1.3, marginBottom: 10 },
+  ratingRow: { alignItems: "center", flexDirection: "row", gap: 16 },
+  ratingValue: { color: colors.ink, fontSize: 24, fontWeight: "800" },
   container1: {
     //justifyContent:'center',
     textAlign: "center",
@@ -216,16 +212,12 @@ const styles = StyleSheet.create({
   },
   container4: {
     justifyContent: "center",
-    marginRight: 700,
-    // marginTop:30
-    margin: 70,
   },
   moviedata: {
-    fontSize: 28,
-    color: "black",
-    textAlign: "center",
-    //    marginVertical: 20,
-    //margin:20
+    color: colors.ink,
+    fontSize: 42,
+    fontWeight: "800",
+    marginTop: 10,
   },
   avg: {
     justifyContent: "center",
@@ -233,42 +225,32 @@ const styles = StyleSheet.create({
     // marginLeft:0
   },
   userRatingList: {
-    justifyContent: "center",
-    margin: 0,
+    maxWidth: 980,
+    paddingVertical: 34,
+    width: "100%",
   },
   RatingText: {
-    fontSize: 25,
-    color: "black",
-    textAlign: "center",
+    color: colors.ink,
+    fontSize: 22,
+    fontWeight: "800",
+    marginBottom: 18,
   },
   username: {
-    fontSize: 20,
-    color: "black",
-    textAlign: "center",
+    color: colors.muted,
+    fontSize: 15,
   },
   image: {
-    flexDirection: "row",
-    borderWidth: 1,
-    borderColor: "red",
-    marginTop: 0,
-    width: 290,
-    height: 350,
-    marginRight: 10,
+    borderRadius: 5,
+    height: 440,
+    width: 300,
   },
-  Logout: {
-    justifyContent: "center",
-    marginLeft: 700,
-    // marginTop:30
-    margin: 10,
-  },
-
   logoutButton: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 10,
+    borderColor: colors.line,
+    borderRadius: 7,
     borderWidth: 1,
-    borderColor: "gray",
-    borderRadius: 5,
-    marginBottom: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
   },
 });
